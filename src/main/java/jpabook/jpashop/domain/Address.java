@@ -6,7 +6,7 @@ import lombok.Setter;
 import javax.persistence.Embeddable;
 
 @Embeddable // jpa의 내장 타입
-@Getter @Setter
+@Getter
 public class Address {
 
     private String city;
