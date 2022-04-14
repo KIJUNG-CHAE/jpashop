@@ -12,7 +12,7 @@ import java.util.List;
 @Entity
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "dtype")
-@Getter // @Setter 보다는 안에 로직을 만들어야한다.
+@Getter @Setter //보다는 안에 로직을 만들어야한다.
 public abstract class Item {
 
     @Id
