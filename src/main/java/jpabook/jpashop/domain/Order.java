@@ -1,6 +1,8 @@
 package jpabook.jpashop.domain;
 
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
@@ -13,6 +15,7 @@ import static javax.persistence.FetchType.*;
 @Entity
 @Table(name = "orders")
 @Getter @Setter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Order {
 
     @Id
@@ -26,6 +29,7 @@ public class Order {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     // 모든 엔티티들은 저장하려면 persistence를 각각 해줘야함, cascade속성을 넣으면 영속성을 자동으로 전파시켜준다.
+    // 다른 곳에서도 orderitemss나 delivery를 사용한다면 cascade를 넣으면 안된다. 복잡하게 얽혀 돌아감...
     private List<OrderItem> orderItems = new ArrayList<>();
 
     @OneToOne(fetch = LAZY, cascade = CascadeType.ALL)
@@ -42,7 +46,7 @@ public class Order {
         member.getOrders().add(this);
     }
 
-    public void setOrderItem(OrderItem orderItem) {
+    public void addOrderItem(OrderItem orderItem) {
         orderItems.add(orderItem);
         orderItem.setOrder(this);
     }
@@ -50,5 +54,44 @@ public class Order {
     public void setDelivery(Delivery delivery) {
         this.delivery = delivery;
         delivery.setOrder(this);
+    }
+
+    //생성 메서드 (앞으로 생성하는 지점을 변경하려면 이 부분만 변경하면 된다!)
+    public static Order createOrder(Member member, Delivery delivery, OrderItem... orderItems) {
+        Order order = new Order();
+        order.setMember(member);
+        order.setDelivery(delivery);
+        for (OrderItem orderitem : orderItems) {
+            order.addOrderItem(orderitem);
+        }
+        order.setStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        return order;
+    }
+
+    //비즈니스 로직
+    /**
+     * 주문 취소 
+     */
+    public void cancel() {
+        if(delivery.getStatus() == DeliveryStatus.COMP) {
+            throw new IllegalStateException("이미 배송완료된 상품은 취소가 불가능합니다.");
+        }
+
+        this.setStatus(OrderStatus.CANCEL);
+        for (OrderItem orderItem : orderItems) {
+            orderItem.cancel();
+        }
+    }
+
+    //조회 로직
+    /**
+     * 전체 주문 가격 조회
+     */
+    public int getTotalPrice() {
+        int totalPrice = orderItems.stream()
+                .mapToInt(OrderItem::getTotalPrice)
+                .sum();
+        return totalPrice;
     }
 }
