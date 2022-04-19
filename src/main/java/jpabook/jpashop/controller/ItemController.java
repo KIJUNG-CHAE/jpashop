@@ -62,18 +62,24 @@ public class ItemController {
     }
 
     @PostMapping("items/{itemId}/edit")
-    public String updateItem(@ModelAttribute("form") BookForm form, @PathVariable String itemId) {
+    public String updateItem(@ModelAttribute("form") BookForm form, @PathVariable Long itemId) {
 
+        //준영속 엔티티를 수정하는 두가지 방법
+        /*
+        1. 머지를 이용하는 방법 (위험) << 모든 필드를 바꿔치기 하기 때문.
         Book book = new Book();
-
         book.setId(form.getId());
         book.setName(form.getName());
         book.setPrice(form.getPrice());
         book.setStockQuantity(form.getStockQuantity());
         book.setAuthor(form.getAuthor());
         book.setIsbn(form.getIsbn());
-
         itemService.saveItem(book);
+        */
+
+         /* 2. 변경 감지를 통한 수정 방법 */
+        itemService.UpdateItem(itemId, form.getName(), form.getPrice(), form.getStockQuantity());
+
         return "redirect:/items";
     }
 }
