@@ -38,6 +38,7 @@ public class Order {
 
     private LocalDateTime orderDate; // 주문시간
 
+    @Enumerated(EnumType.STRING)
     private OrderStatus status; // 주문상태 [ORDER, CANCEL]
 
     //연관관계 편의 메서드 (양방향 연관관계일때 한 쪽편만 세팅해주면, 다른편의 객체도 세팅되게끔 하는 메서드)
